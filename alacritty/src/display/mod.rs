@@ -544,10 +544,12 @@ impl Display {
             // Indicate vi mode by showing the cursor's position in the top right corner.
             let vi_point = vi_mode_cursor.point;
             let line = (-vi_point.line.0 + size_info.bottommost_line().0) as usize;
-            self.draw_line_indicator(config, &size_info, total_lines, Some(vi_point), line);
+            self.draw_line_indicator(config, &size_info, total_lines, Some(vi_point), line, 2);
         } else if search_state.regex().is_some() {
             // Show current display offset in vi-less search to indicate match position.
-            self.draw_line_indicator(config, &size_info, total_lines, None, display_offset);
+            self.draw_line_indicator(config, &size_info, total_lines, None, display_offset, 0);
+        } else if display_offset != 0 {
+            self.draw_line_indicator(config, &size_info, total_lines, None, display_offset, 1);
         }
 
         // Push the cursor rects for rendering.
@@ -779,12 +781,19 @@ impl Display {
         total_lines: usize,
         vi_mode_point: Option<Point>,
         line: usize,
+        mode: i32
     ) {
-        let text = format!("[{}/{}]", line, total_lines - 1);
+        let percent = ((total_lines - 1) - line) * 100 / (total_lines - 1);
+        let text = format!(" \u{f718} [{}/{}] {}% ", line, total_lines - 1, percent);
         let column = Column(size_info.columns().saturating_sub(text.len()));
         let colors = &config.ui_config.colors;
         let fg = colors.line_indicator.foreground.unwrap_or(colors.primary.background);
-        let bg = colors.line_indicator.background.unwrap_or(colors.primary.foreground);
+        let mut bg = colors.line_indicator.background.unwrap_or(colors.primary.foreground);
+        if mode == 1 {
+            bg = colors.line_indicator.background.unwrap_or(config.ui_config.colors.normal.red);
+        } else if mode == 2 {
+            bg = colors.line_indicator.background.unwrap_or(config.ui_config.colors.normal.green);
+        }
 
         // Do not render anything if it would obscure the vi mode cursor.
         if vi_mode_point.map_or(true, |point| point.line != 0 || point.column < column) {
