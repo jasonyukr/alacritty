@@ -551,10 +551,12 @@ impl Display {
             let obstructed_column = Some(vi_point)
                 .filter(|point| point.line == -(display_offset as i32))
                 .map(|point| point.column);
-            self.draw_line_indicator(config, &size_info, total_lines, obstructed_column, line);
+            self.draw_line_indicator(config, &size_info, total_lines, obstructed_column, line, 2);
         } else if search_state.regex().is_some() {
             // Show current display offset in vi-less search to indicate match position.
-            self.draw_line_indicator(config, &size_info, total_lines, None, display_offset);
+            self.draw_line_indicator(config, &size_info, total_lines, None, display_offset, 0);
+        } else if display_offset != 0 {
+            self.draw_line_indicator(config, &size_info, total_lines, None, display_offset, 1);
         }
 
         // Push the cursor rects for rendering.
@@ -786,12 +788,19 @@ impl Display {
         total_lines: usize,
         obstructed_column: Option<Column>,
         line: usize,
+        mode: i32
     ) {
-        let text = format!("[{}/{}]", line, total_lines - 1);
+        let percent = ((total_lines - 1) - line) * 100 / (total_lines - 1);
+        let text = format!(" \u{1f53e}  \u{f718} {}% [{}/{}] \u{1f53e}  ", percent, line, total_lines - 1);
         let column = Column(size_info.columns().saturating_sub(text.len()));
         let colors = &config.colors;
         let fg = colors.line_indicator.foreground.unwrap_or(colors.primary.background);
-        let bg = colors.line_indicator.background.unwrap_or(colors.primary.foreground);
+        let mut bg = colors.line_indicator.background.unwrap_or(colors.primary.foreground);
+        if mode == 1 {
+            bg = colors.line_indicator.background.unwrap_or(colors.normal.red);
+        } else if mode == 2 {
+            bg = colors.line_indicator.background.unwrap_or(colors.normal.green);
+        }
 
         // Do not render anything if it would obscure the vi mode cursor.
         if obstructed_column.map_or(true, |obstructed_column| obstructed_column < column) {
