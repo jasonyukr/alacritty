@@ -797,7 +797,7 @@ impl Display {
         let fg = colors.line_indicator.foreground.unwrap_or(colors.primary.background);
         let mut bg = colors.line_indicator.background.unwrap_or(colors.primary.foreground);
         if mode == 1 {
-            bg = colors.line_indicator.background.unwrap_or(colors.normal.red);
+            bg = colors.line_indicator.background.unwrap_or(colors.normal.magenta);
         } else if mode == 2 {
             bg = colors.line_indicator.background.unwrap_or(colors.normal.green);
         }
