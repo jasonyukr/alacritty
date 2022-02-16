@@ -791,7 +791,7 @@ impl Display {
         mode: i32
     ) {
         let percent = ((total_lines - 1) - line) * 100 / (total_lines - 1);
-        let text = format!(" \u{1f53e}  \u{f718} {}% [{}/{}] \u{1f53e}  ", percent, line, total_lines - 1);
+        let text = format!(" 🞀 {}% [{}/{}] 🞂 ", percent, line, total_lines - 1);
         let column = Column(size_info.columns().saturating_sub(text.len()));
         let colors = &config.colors;
         let fg = colors.line_indicator.foreground.unwrap_or(colors.primary.background);
