@@ -1316,7 +1316,7 @@ impl Display {
 
         let percent = ((total_lines - 1) - line) * 100 / (total_lines - 1);
         // let text = format!("[{}/{}]", line, total_lines - 1);
-        let text = format!(" 🞀 {}% [{}/{}] 🞂 ", percent, line, total_lines - 1);
+        let text = format!("❰ {}% [{}/{}] ❱", percent, line, total_lines - 1);
         let column = Column(self.size_info.columns().saturating_sub(text.len()));
         let point = Point::new(0, column);
 
