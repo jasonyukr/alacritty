@@ -195,6 +195,7 @@ pub struct NormalColors {
     pub magenta: Rgb,
     pub cyan: Rgb,
     pub white: Rgb,
+    pub gray: Rgb,
 }
 
 impl Default for NormalColors {
@@ -208,6 +209,7 @@ impl Default for NormalColors {
             magenta: Rgb { r: 0xb2, g: 0x94, b: 0xbb },
             cyan: Rgb { r: 0x8a, g: 0xbe, b: 0xb7 },
             white: Rgb { r: 0xc5, g: 0xc8, b: 0xc6 },
+            gray: Rgb { r: 0x5f, g: 0x5f, b: 0x5f },
         }
     }
 }

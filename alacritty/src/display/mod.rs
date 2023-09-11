@@ -1348,7 +1348,7 @@ impl Display {
 
             if total_lines > self.size_info.screen_lines() && scroll_line <= (self.size_info.screen_lines() - 1) {
                 // Draw scrollbar
-                self.renderer.draw_string(scroll_point, bg, fg, "▐".chars(), &self.size_info, glyph_cache);
+                self.renderer.draw_string(scroll_point, config.colors.normal.gray, fg, "▐".chars(), &self.size_info, glyph_cache);
             }
         }
     }
