@@ -1330,8 +1330,10 @@ impl Display {
         if self.collect_damage() {
             self.damage_rects.push(self.damage_from_point(damage_point, MAX_SIZE as u32));
 
-            //TODO: need the verification for scrollbar
-            self.damage_rects.push(self.damage_from_point(scroll_point, MAX_SIZE as u32));
+            if total_lines > self.size_info.screen_lines() {
+                //TODO: need the verification for scrollbar region damage
+                self.damage_rects.push(self.damage_from_point(scroll_point, MAX_SIZE as u32));
+            }
         }
 
         let colors = &config.colors;
@@ -1344,8 +1346,8 @@ impl Display {
             let glyph_cache = &mut self.glyph_cache;
             self.renderer.draw_string(point, fg, bg, text.chars(), &self.size_info, glyph_cache);
 
-            // Draw scrollbar
-            if scroll_line <= (self.size_info.screen_lines() - 1) {
+            if total_lines > self.size_info.screen_lines() && scroll_line <= (self.size_info.screen_lines() - 1) {
+                // Draw scrollbar
                 self.renderer.draw_string(scroll_point, bg, fg, "▐".chars(), &self.size_info, glyph_cache);
             }
         }
