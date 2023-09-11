@@ -1314,19 +1314,24 @@ impl Display {
             }
         }
 
-        let percent = ((total_lines - 1) - line) * 100 / (total_lines - 1);
-        // let text = format!("[{}/{}]", line, total_lines - 1);
-        let text = format!("❰ {}% [{}/{}] ❱", percent, line, total_lines - 1);
-        let column = Column(self.size_info.columns().saturating_sub(text.len()));
+        let text = format!("[{}/{}]", line, total_lines - 1);
+        let column = Column(self.size_info.columns().saturating_sub(text.len() + 1));
         let point = Point::new(0, column);
+
+        let percent = ((total_lines - 1) - line) * 100 / (total_lines - 1);
+        let scroll_line = (self.size_info.screen_lines() - 1) * percent / 100;
+        let scroll_point = Point::new((self.size_info.screen_lines() - 1) * percent / 100, Column(self.size_info.columns() - 1));
 
         // Damage the maximum possible length of the format text, which could be achieved when
         // using `MAX_SCROLLBACK_LINES` as current and total lines adding a `3` for formatting.
         // const MAX_SIZE: usize = 2 * num_digits(MAX_SCROLLBACK_LINES) + 3;
-        const MAX_SIZE: usize = 2 * num_digits(MAX_SCROLLBACK_LINES) + 3 + (3 + 10);
+        const MAX_SIZE: usize = 2 * num_digits(MAX_SCROLLBACK_LINES) + 3 + (1);
         let damage_point = Point::new(0, Column(self.size_info.columns().saturating_sub(MAX_SIZE)));
         if self.collect_damage() {
             self.damage_rects.push(self.damage_from_point(damage_point, MAX_SIZE as u32));
+
+            //TODO: need the verification for scrollbar
+            self.damage_rects.push(self.damage_from_point(scroll_point, MAX_SIZE as u32));
         }
 
         let colors = &config.colors;
@@ -1338,6 +1343,11 @@ impl Display {
         if obstructed_column.map_or(true, |obstructed_column| obstructed_column < column) {
             let glyph_cache = &mut self.glyph_cache;
             self.renderer.draw_string(point, fg, bg, text.chars(), &self.size_info, glyph_cache);
+
+            // Draw scrollbar
+            if scroll_line <= (self.size_info.screen_lines() - 1) {
+                self.renderer.draw_string(scroll_point, bg, fg, "▐".chars(), &self.size_info, glyph_cache);
+            }
         }
     }
 
