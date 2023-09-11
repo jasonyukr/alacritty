@@ -1314,24 +1314,24 @@ impl Display {
             }
         }
 
-        let text = format!("[{}/{}]", line, total_lines - 1);
+        let percent = ((total_lines - 1) - line) * 100 / (total_lines - 1);
+
+        let text = format!("[{}% {}/{}]", percent, line, total_lines - 1);
         let column = Column(self.size_info.columns().saturating_sub(text.len() + 1));
         let point = Point::new(0, column);
 
-        let percent = ((total_lines - 1) - line) * 100 / (total_lines - 1);
         let scroll_line = (self.size_info.screen_lines() - 1) * percent / 100;
         let scroll_point = Point::new((self.size_info.screen_lines() - 1) * percent / 100, Column(self.size_info.columns() - 1));
 
         // Damage the maximum possible length of the format text, which could be achieved when
         // using `MAX_SCROLLBACK_LINES` as current and total lines adding a `3` for formatting.
-        // const MAX_SIZE: usize = 2 * num_digits(MAX_SCROLLBACK_LINES) + 3;
-        const MAX_SIZE: usize = 2 * num_digits(MAX_SCROLLBACK_LINES) + 3 + (1);
+        const MAX_SIZE: usize = 2 * num_digits(MAX_SCROLLBACK_LINES) + 3 + (1 + 4);
         let damage_point = Point::new(0, Column(self.size_info.columns().saturating_sub(MAX_SIZE)));
         if self.collect_damage() {
             self.damage_rects.push(self.damage_from_point(damage_point, MAX_SIZE as u32));
 
             if total_lines > self.size_info.screen_lines() {
-                //TODO: need the verification for scrollbar region damage
+                //TODO: need to verify
                 self.damage_rects.push(self.damage_from_point(scroll_point, MAX_SIZE as u32));
             }
         }
