@@ -494,7 +494,7 @@ impl<'a, N: Notify + 'a, T: EventListener> input::ActionContext<T> for ActionCon
         }
 
         // Enable IME so we can input into the search bar with it if we were in Vi mode.
-        self.window().set_ime_allowed(true);
+        self.window().set_ime_allowed(false); // disable IME
 
         self.display.pending_update.dirty = true;
     }
@@ -833,7 +833,7 @@ impl<'a, N: Notify + 'a, T: EventListener> input::ActionContext<T> for ActionCon
         }
 
         // We don't want IME in Vi mode.
-        self.window().set_ime_allowed(was_in_vi_mode);
+        self.window().set_ime_allowed(false); // (was_in_vi_mode); // disable IME
 
         self.terminal.toggle_vi_mode();
 
@@ -969,7 +969,7 @@ impl<'a, N: Notify + 'a, T: EventListener> ActionContext<'a, N, T> {
     /// Cleanup the search state.
     fn exit_search(&mut self) {
         let vi_mode = self.terminal.mode().contains(TermMode::VI);
-        self.window().set_ime_allowed(!vi_mode);
+        self.window().set_ime_allowed(false); // (!vi_mode); // disable IME
 
         self.display.pending_update.dirty = true;
         self.search_state.history_index = None;
