@@ -124,8 +124,6 @@ impl Drop for TemporaryFiles {
 /// Creates a window, the terminal state, PTY, I/O event loop, input processor,
 /// config change monitor, and runs the main display loop.
 fn alacritty(options: Options) -> Result<(), Box<dyn Error>> {
-    std::env::set_var("WINIT_UNIX_BACKEND", "x11");
-
     // Setup winit event loop.
     let window_event_loop = WinitEventLoopBuilder::<Event>::with_user_event().build();
 
