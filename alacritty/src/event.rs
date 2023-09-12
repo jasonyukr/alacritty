@@ -494,7 +494,7 @@ impl<'a, N: Notify + 'a, T: EventListener> input::ActionContext<T> for ActionCon
         }
 
         // Enable IME so we can input into the search bar with it if we were in Vi mode.
-        self.window().set_ime_allowed(false); // disable IME
+        //self.window().set_ime_allowed(true);
 
         self.display.pending_update.dirty = true;
     }
@@ -833,7 +833,7 @@ impl<'a, N: Notify + 'a, T: EventListener> input::ActionContext<T> for ActionCon
         }
 
         // We don't want IME in Vi mode.
-        self.window().set_ime_allowed(false); // (was_in_vi_mode); // disable IME
+        //self.window().set_ime_allowed(was_in_vi_mode);
 
         self.terminal.toggle_vi_mode();
 
@@ -969,7 +969,7 @@ impl<'a, N: Notify + 'a, T: EventListener> ActionContext<'a, N, T> {
     /// Cleanup the search state.
     fn exit_search(&mut self) {
         let vi_mode = self.terminal.mode().contains(TermMode::VI);
-        self.window().set_ime_allowed(false); // (!vi_mode); // disable IME
+        //self.window().set_ime_allowed(!vi_mode);
 
         self.display.pending_update.dirty = true;
         self.search_state.history_index = None;
@@ -1337,38 +1337,39 @@ impl input::Processor<EventProxy, ActionContext<'_, Notifier, EventProxy>> {
                             *self.ctx.dirty = true;
                         }
                     },
-                    WindowEvent::Ime(ime) => match ime {
-                        Ime::Commit(text) => {
-                            *self.ctx.dirty = true;
-
-                            for ch in text.chars() {
-                                self.received_char(ch);
-                            }
-
-                            self.ctx.update_cursor_blinking();
-                        },
-                        Ime::Preedit(text, cursor_offset) => {
-                            let preedit = if text.is_empty() {
-                                None
-                            } else {
-                                Some(Preedit::new(text, cursor_offset.map(|offset| offset.0)))
-                            };
-
-                            if self.ctx.display.ime.preedit() != preedit.as_ref() {
-                                self.ctx.display.ime.set_preedit(preedit);
-                                self.ctx.update_cursor_blinking();
-                                *self.ctx.dirty = true;
-                            }
-                        },
-                        Ime::Enabled => {
-                            self.ctx.display.ime.set_enabled(true);
-                            *self.ctx.dirty = true;
-                        },
-                        Ime::Disabled => {
-                            self.ctx.display.ime.set_enabled(false);
-                            *self.ctx.dirty = true;
-                        },
-                    },
+                    WindowEvent::Ime(ime) => { },
+                    // WindowEvent::Ime(ime) => match ime {
+                    //     Ime::Commit(text) => {
+                    //         *self.ctx.dirty = true;
+                    //
+                    //         for ch in text.chars() {
+                    //             self.received_char(ch);
+                    //         }
+                    //
+                    //         self.ctx.update_cursor_blinking();
+                    //     },
+                    //     Ime::Preedit(text, cursor_offset) => {
+                    //         let preedit = if text.is_empty() {
+                    //             None
+                    //         } else {
+                    //             Some(Preedit::new(text, cursor_offset.map(|offset| offset.0)))
+                    //         };
+                    //
+                    //         if self.ctx.display.ime.preedit() != preedit.as_ref() {
+                    //             self.ctx.display.ime.set_preedit(preedit);
+                    //             self.ctx.update_cursor_blinking();
+                    //             *self.ctx.dirty = true;
+                    //         }
+                    //     },
+                    //     Ime::Enabled => {
+                    //         self.ctx.display.ime.set_enabled(true);
+                    //         *self.ctx.dirty = true;
+                    //     },
+                    //     Ime::Disabled => {
+                    //         self.ctx.display.ime.set_enabled(false);
+                    //         *self.ctx.dirty = true;
+                    //     },
+                    // },
                     WindowEvent::KeyboardInput { is_synthetic: true, .. }
                     | WindowEvent::TouchpadPressure { .. }
                     | WindowEvent::TouchpadMagnify { .. }
