@@ -849,10 +849,12 @@ impl Display {
             let obstructed_column = Some(vi_cursor_point)
                 .filter(|point| point.line == -(display_offset as i32))
                 .map(|point| point.column);
-            self.draw_line_indicator(config, total_lines, obstructed_column, line);
+            self.draw_line_indicator(config, total_lines, obstructed_column, line, config.colors.normal.magenta);
         } else if search_state.regex().is_some() {
             // Show current display offset in vi-less search to indicate match position.
-            self.draw_line_indicator(config, total_lines, None, display_offset);
+            self.draw_line_indicator(config, total_lines, None, display_offset, config.colors.primary.foreground);
+        } else if display_offset != 0 {
+            self.draw_line_indicator(config, total_lines, None, display_offset, config.colors.normal.green);
         };
 
         // Draw cursor.
@@ -1299,6 +1301,7 @@ impl Display {
         total_lines: usize,
         obstructed_column: Option<Column>,
         line: usize,
+        back_color: Rgb,
     ) {
         const fn num_digits(mut number: u32) -> usize {
             let mut res = 0;
@@ -1311,26 +1314,39 @@ impl Display {
             }
         }
 
-        let text = format!("[{}/{}]", line, total_lines - 1);
-        let column = Column(self.size_info.columns().saturating_sub(text.len()));
+        let percent = ((total_lines - 1) - line) * 100 / (total_lines - 1);
+        let text = format!("[{}% {}/{}]", percent, line, total_lines - 1);
+        let column = Column(self.size_info.columns().saturating_sub(text.len() + 1));
         let point = Point::new(0, column);
+
+        let scroll_line = (self.size_info.screen_lines() - 1) * percent / 100;
+        let scroll_point = Point::new((self.size_info.screen_lines() - 1) * percent / 100, Column(self.size_info.columns() - 1));
 
         // Damage the maximum possible length of the format text, which could be achieved when
         // using `MAX_SCROLLBACK_LINES` as current and total lines adding a `3` for formatting.
-        const MAX_SIZE: usize = 2 * num_digits(MAX_SCROLLBACK_LINES) + 3;
+        const MAX_SIZE: usize = 2 * num_digits(MAX_SCROLLBACK_LINES) + 3 + (1 + 4);
         let damage_point = Point::new(0, Column(self.size_info.columns().saturating_sub(MAX_SIZE)));
         if self.collect_damage() {
             self.damage_rects.push(self.damage_from_point(damage_point, MAX_SIZE as u32));
+
+            if total_lines > self.size_info.screen_lines() {
+                self.damage_rects.push(self.damage_from_point(scroll_point, MAX_SIZE as u32));
+            }
         }
 
         let colors = &config.colors;
         let fg = colors.line_indicator.foreground.unwrap_or(colors.primary.background);
-        let bg = colors.line_indicator.background.unwrap_or(colors.primary.foreground);
+        let bg = colors.line_indicator.background.unwrap_or(back_color);
 
         // Do not render anything if it would obscure the vi mode cursor.
         if obstructed_column.map_or(true, |obstructed_column| obstructed_column < column) {
             let glyph_cache = &mut self.glyph_cache;
             self.renderer.draw_string(point, fg, bg, text.chars(), &self.size_info, glyph_cache);
+
+            // Draw scrollbar character if needed
+            if total_lines > self.size_info.screen_lines() && scroll_line <= (self.size_info.screen_lines() - 1) {
+                self.renderer.draw_string(scroll_point, config.colors.normal.gray, fg, "▐".chars(), &self.size_info, glyph_cache);
+            }
         }
     }
 
