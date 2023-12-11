@@ -172,8 +172,11 @@ impl Window {
         window.set_cursor_icon(current_mouse_cursor);
 
         // Enable IME.
-        window.set_ime_allowed(true);
-        window.set_ime_purpose(ImePurpose::Terminal);
+        //window.set_ime_allowed(true);
+        //window.set_ime_purpose(ImePurpose::Terminal);
+
+        // Disable IME.
+        window.set_ime_allowed(false);
 
         // Set initial transparency hint.
         window.set_transparent(config.window_opacity() < 1.);
@@ -400,7 +403,7 @@ impl Window {
     }
 
     pub fn set_ime_allowed(&self, allowed: bool) {
-        self.window.set_ime_allowed(allowed);
+        self.window.set_ime_allowed(false); // disable IME
     }
 
     /// Adjust the IME editor position according to the new location of the cursor.
