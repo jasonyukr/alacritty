@@ -70,6 +70,13 @@ const MAX_SEARCH_HISTORY_SIZE: usize = 255;
 /// Touch zoom speed.
 const TOUCH_ZOOM_FACTOR: f32 = 0.01;
 
+/// For view_scrollback_lines
+use std::io::prelude::*;
+#[link(name = "c")]
+extern "C" {
+    fn getrandom(buf: *const u8, buflen: usize, flags: u32) -> usize;
+}
+
 /// Alacritty events.
 #[derive(Debug, Clone)]
 pub struct Event {
@@ -275,6 +282,41 @@ impl<'a, N: Notify + 'a, T: EventListener> input::ActionContext<T> for ActionCon
             self.clipboard.store(ClipboardType::Clipboard, text.clone());
         }
         self.clipboard.store(ty, text);
+    }
+
+    fn view_scrollback_lines(&mut self) {
+        // get start (first-line first-column)
+        self.scroll(Scroll::Top);
+        let topmost_line = self.terminal().topmost_line();
+        let mut start = Point::new(topmost_line, Column(0));
+        start = self.terminal().line_search_left(start);
+
+        // get end (last-line last-column)
+        self.scroll(Scroll::Bottom);
+        let term = self.terminal_mut();
+        let bottommost_line = term.bottommost_line();
+        let mut end = Point::new(bottommost_line, Column(0));
+        end = self.terminal().line_search_right(end);
+
+        // get scrollback lines
+        let scrollback_lines = self.terminal.bounds_to_string(start, end);
+
+        // create temp directory
+        let tmp_dir = "/tmp/alacritty";
+        let _ = std::fs::create_dir_all(tmp_dir);
+
+        // create temp file with scrollback lines
+        let rnd = [0u8; 8];
+        unsafe { getrandom(rnd.as_ptr(), 8, 2) };
+        let tmp_file = format!("{}/{:02x}{:02x}{:02x}{:02x}{:02x}{:02x}{:02x}{:02x}.buff", tmp_dir, rnd[0], rnd[1], rnd[2], rnd[3], rnd[4], rnd[5], rnd[6], rnd[7]);
+        let mut f = std::fs::File::create(&tmp_file).expect("Unable to create file");
+        f.write_all(scrollback_lines.as_bytes()).expect("Unable to write data");
+
+        // open external editor (neovim) bound to "*.buff" via xdg-open
+        std::process::Command::new("xdg-open")
+            .arg(&tmp_file)
+            .status()
+            .expect("Something went wrong");
     }
 
     fn selection_is_empty(&self) -> bool {
