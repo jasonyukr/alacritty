@@ -1296,7 +1296,7 @@ impl Display {
         let columns = self.size_info.columns();
         let percent = ((total_lines - 1) - line) * 100 / (total_lines - 1);
         let text = format!("[{}% {}/{}]", percent, line, total_lines - 1);
-        let column = Column(self.size_info.columns().saturating_sub(text.len()));
+        let column = Column(self.size_info.columns().saturating_sub(text.len() + 1));
         let point = Point::new(0, column);
 
         let scroll_line = (self.size_info.screen_lines() - 1) * percent / 100;
