@@ -6,6 +6,7 @@ use std::collections::{HashMap, HashSet, VecDeque};
 use std::error::Error;
 use std::ffi::OsStr;
 use std::fmt::Debug;
+use std::fs;
 #[cfg(not(windows))]
 use std::os::unix::io::RawFd;
 use std::path::PathBuf;
@@ -336,6 +337,13 @@ impl<'a, N: Notify + 'a, T: EventListener> input::ActionContext<T> for ActionCon
         let tmp_file = format!("{}/{:02x}{:02x}{:02x}{:02x}{:02x}{:02x}{:02x}{:02x}.buff", tmp_dir, rnd[0], rnd[1], rnd[2], rnd[3], rnd[4], rnd[5], rnd[6], rnd[7]);
         let mut f = std::fs::File::create(&tmp_file).expect("Unable to create file");
         f.write_all(scrollback_lines.as_bytes()).expect("Unable to write data");
+
+        // set the file read-only
+        if let Ok(metadata) = fs::metadata(&tmp_file) {
+            let mut perms = metadata.permissions();
+            perms.set_readonly(true);
+            fs::set_permissions(&tmp_file, perms).unwrap();
+        }
 
         // open external editor (neovim) bound to "*.buff" via xdg-open
         std::process::Command::new("xdg-open")
