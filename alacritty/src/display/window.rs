@@ -234,8 +234,8 @@ impl Window {
         let current_mouse_cursor = CursorIcon::Text;
         windowed_context.window().set_cursor_icon(current_mouse_cursor);
 
-        // Enable IME.
-        windowed_context.window().set_ime_allowed(true);
+        // Disable IME.
+        windowed_context.window().set_ime_allowed(false);
 
         // Set OpenGL symbol loader. This call MUST be after window.make_current on windows.
         gl::load_with(|symbol| windowed_context.get_proc_address(symbol) as *const _);
@@ -452,8 +452,8 @@ impl Window {
         self.wayland_surface.as_ref()
     }
 
-    pub fn set_ime_allowed(&self, allowed: bool) {
-        self.windowed_context.window().set_ime_allowed(allowed);
+    pub fn set_ime_allowed(&self, _allowed: bool) {
+        self.windowed_context.window().set_ime_allowed(false); // Disable IME
     }
 
     /// Adjust the IME editor position according to the new location of the cursor.
