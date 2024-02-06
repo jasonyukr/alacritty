@@ -261,10 +261,15 @@ impl<'a, N: Notify + 'a, T: EventListener> input::ActionContext<T> for ActionCon
 
     // Copy text selection.
     fn copy_selection(&mut self, ty: ClipboardType) {
-        let text = match self.terminal.selection_to_string().filter(|s| !s.is_empty()) {
+        let mut text = match self.terminal.selection_to_string().filter(|s| !s.is_empty()) {
             Some(text) => text,
             None => return,
         };
+
+        // Remove trailing new line character before the copy to clipboard
+        if text.ends_with('\n') {
+            text = text[..text.len() - 1].to_string();
+        }
 
         if ty == ClipboardType::Selection && self.config.terminal_config.selection.save_to_clipboard
         {
