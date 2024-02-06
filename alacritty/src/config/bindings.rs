@@ -118,6 +118,9 @@ pub enum Action {
     /// Store current selection into clipboard.
     Copy,
 
+    /// View the entire scrollback lines with external editor.
+    ViewScrollbackLines,
+
     #[cfg(not(any(target_os = "macos", windows)))]
     /// Store current selection into selection buffer.
     CopySelection,
