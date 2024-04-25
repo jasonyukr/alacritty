@@ -120,6 +120,9 @@ pub enum Action {
     /// Store current selection into clipboard.
     Copy,
 
+    /// View the entire scrollback lines with external editor.
+    ViewScrollbackLines,
+
     /// Store current selection into selection buffer.
     CopySelection,
 
