@@ -368,10 +368,10 @@ pub struct Display {
 
     /// The ime on the given display.
     pub ime: Ime,
-
+/*
     /// The state of the timer for frame scheduling.
     pub frame_timer: FrameTimer,
-
+*/
     /// Damage tracker for the given display.
     pub damage_tracker: DamageTracker,
 
@@ -518,7 +518,9 @@ impl Display {
             renderer: ManuallyDrop::new(renderer),
             surface: ManuallyDrop::new(surface),
             colors: List::from(&config.colors),
+/*
             frame_timer: FrameTimer::new(),
+*/
             raw_window_handle,
             damage_tracker,
             glyph_cache,
@@ -999,13 +1001,13 @@ impl Display {
             // permanent one frame delay.
             self.renderer.finish();
         }
-
+/*
         // XXX: Request the new frame after swapping buffers, so the
         // time to finish OpenGL operations is accounted for in the timeout.
         if !matches!(self.raw_window_handle, RawWindowHandle::Wayland(_)) {
             self.request_frame(scheduler);
         }
-
+*/
         self.damage_tracker.swap_damage();
     }
 
@@ -1347,7 +1349,7 @@ impl Display {
             render_rects.push(render_rect);
         }
     }
-
+/*
     /// Request a new frame for a window on Wayland.
     fn request_frame(&mut self, scheduler: &mut Scheduler) {
         // Mark that we've used a frame.
@@ -1373,8 +1375,8 @@ impl Display {
 
         scheduler.schedule(event, swap_timeout, false, timer_id);
     }
+*/
 }
-
 impl Drop for Display {
     fn drop(&mut self) {
         // Switch OpenGL context before dropping, otherwise objects (like programs) from other
@@ -1508,7 +1510,7 @@ impl<T> DerefMut for Replaceable<T> {
         self.get_mut()
     }
 }
-
+/*
 /// The frame timer state.
 pub struct FrameTimer {
     /// Base timestamp used to compute sync points.
@@ -1556,7 +1558,7 @@ impl FrameTimer {
         }
     }
 }
-
+*/
 /// Calculate the cell dimensions based on font metrics.
 ///
 /// This will return a tuple of the cell width and height.
