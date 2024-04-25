@@ -842,10 +842,12 @@ impl Display {
             let obstructed_column = Some(vi_cursor_point)
                 .filter(|point| point.line == -(display_offset as i32))
                 .map(|point| point.column);
-            self.draw_line_indicator(config, total_lines, obstructed_column, line);
+            self.draw_line_indicator(config, total_lines, obstructed_column, line, config.colors.normal.magenta);
         } else if search_state.regex().is_some() {
             // Show current display offset in vi-less search to indicate match position.
-            self.draw_line_indicator(config, total_lines, None, display_offset);
+            self.draw_line_indicator(config, total_lines, None, display_offset, config.colors.primary.foreground);
+        } else if display_offset != 0 {
+            self.draw_line_indicator(config, total_lines, None, display_offset, config.colors.normal.green);
         };
 
         // Draw cursor.
@@ -1289,9 +1291,11 @@ impl Display {
         total_lines: usize,
         obstructed_column: Option<Column>,
         line: usize,
+        back_color: Rgb,
     ) {
         let columns = self.size_info.columns();
-        let text = format!("[{}/{}]", line, total_lines - 1);
+        let percent = ((total_lines - 1) - line) * 100 / (total_lines - 1);
+        let text = format!("[{}% {}/{}]", percent, line, total_lines - 1);
         let column = Column(self.size_info.columns().saturating_sub(text.len()));
         let point = Point::new(0, column);
 
@@ -1304,7 +1308,7 @@ impl Display {
 
         let colors = &config.colors;
         let fg = colors.line_indicator.foreground.unwrap_or(colors.primary.background);
-        let bg = colors.line_indicator.background.unwrap_or(colors.primary.foreground);
+        let bg = colors.line_indicator.background.unwrap_or(back_color);
 
         // Do not render anything if it would obscure the vi mode cursor.
         if obstructed_column.map_or(true, |obstructed_column| obstructed_column < column) {
