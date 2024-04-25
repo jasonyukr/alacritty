@@ -497,9 +497,19 @@ impl Display {
         let mut damage_tracker = DamageTracker::new(size_info.screen_lines(), size_info.columns());
         damage_tracker.debug = config.debug.highlight_damage;
 
+/*
         // Disable vsync.
         if let Err(err) = surface.set_swap_interval(&context, SwapInterval::DontWait) {
             info!("Failed to disable vsync: {}", err);
+        }
+*/
+        // We use vsync everywhere except wayland.
+        if !is_wayland {
+            if let Err(err) =
+                surface.set_swap_interval(&context, SwapInterval::Wait(NonZeroU32::new(1).unwrap()))
+            {
+                info!("Error setting vsync: {:?}", err);
+            }
         }
 
         Ok(Self {
