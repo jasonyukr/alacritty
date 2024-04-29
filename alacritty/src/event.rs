@@ -348,8 +348,9 @@ impl<'a, N: Notify + 'a, T: EventListener> input::ActionContext<T> for ActionCon
         }
 
         // open external editor (neovim) bound to "*.buff" via xdg-open
-        std::process::Command::new("xdg-open")
-            .arg(&tmp_file)
+        let mut cmd = std::process::Command::new("xdg-open");
+        cmd.env("NVIM_QT_HIDE_TITLEBAR", "true");
+        cmd.arg(&tmp_file)
             .status()
             .expect("Something went wrong");
     }
