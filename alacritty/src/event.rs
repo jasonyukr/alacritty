@@ -396,7 +396,8 @@ impl<'a, N: Notify + 'a, T: EventListener> input::ActionContext<T> for ActionCon
         self.terminal.selection = Some(Selection::new(ty, point, side));
         *self.dirty = true;
 
-        self.copy_selection(ClipboardType::Selection);
+        // Stop calling copy_selection() here to delay the clipboard work
+        // self.copy_selection(ClipboardType::Selection);
     }
 
     fn toggle_selection(&mut self, ty: SelectionType, point: Point, side: Side) {
