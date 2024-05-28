@@ -308,6 +308,10 @@ impl<'a, N: Notify + 'a, T: EventListener> input::ActionContext<T> for ActionCon
             self.clipboard.store(ClipboardType::Clipboard, text.clone());
         }
         self.clipboard.store(ty, text);
+
+        // Ring visual bell to highlight that copy has happened.
+        // Refer to TerminalEvent::Bell handler
+        self.display.visual_bell.ring();
     }
 
 
