@@ -80,6 +80,7 @@ pub trait ActionContext<T: EventListener> {
     fn mark_dirty(&mut self) {}
     fn size_info(&self) -> SizeInfo;
     fn copy_selection(&mut self, _ty: ClipboardType) {}
+    fn copy_selection_mute(&mut self, _ty: ClipboardType) {}
     fn view_scrollback_lines(&mut self) {}
     fn start_selection(&mut self, _ty: SelectionType, _point: Point, _side: Side) {}
     fn toggle_selection(&mut self, _ty: SelectionType, _point: Point, _side: Side) {}
@@ -691,7 +692,7 @@ impl<T: EventListener, A: ActionContext<T>> Processor<T, A> {
 
         if let MouseButton::Left | MouseButton::Right = button {
             // Copy selection on release, to prevent flooding the display server.
-            self.ctx.copy_selection(ClipboardType::Selection);
+            self.ctx.copy_selection_mute(ClipboardType::Selection);
         }
     }
 

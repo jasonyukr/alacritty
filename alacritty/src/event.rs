@@ -314,6 +314,18 @@ impl<'a, N: Notify + 'a, T: EventListener> input::ActionContext<T> for ActionCon
         self.display.visual_bell.ring();
     }
 
+    // Copy text selection.
+    fn copy_selection_mute(&mut self, ty: ClipboardType) {
+        let mut text = match self.terminal.selection_to_string().filter(|s| !s.is_empty()) {
+            Some(text) => text,
+            None => return,
+        };
+
+        if ty == ClipboardType::Selection && self.config.selection.save_to_clipboard {
+            self.clipboard.store(ClipboardType::Clipboard, text.clone());
+        }
+        self.clipboard.store(ty, text);
+    }
 
     fn view_scrollback_lines(&mut self) {
         // get start (first-line first-column)
